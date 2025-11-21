@@ -1,0 +1,360 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        -544
+      ],
+      "id": "fe90f33b-b037-4008-91f9-6d2e4e7d536b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://newsapi.org/v2/everything",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "AI Startups"
+            },
+            {
+              "name": "apiKey",
+              "value": "34686e12726d4b409629bd23ef3ed775"
+            },
+            {
+              "name": "language",
+              "value": "en"
+            },
+            {
+              "name": "sortBy",
+              "value": "publishedAt"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -320,
+        -256
+      ],
+      "id": "e319b11c-85cc-4c94-8f2c-cbdbfc11b9eb",
+      "name": "HTTP Request",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "title",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        160,
+        16
+      ],
+      "id": "18015989-9352-4298-a25b-314289b8d98f",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.0-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.0-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Analyze this news article:\nTitle: {{ $json.title }}\nDescription: {{ $json.description }}\n\nYour goal is to act as a Data Analyst. Extract information into strict JSON format.\n\nRules:\n1. \"is_fluff\": Set to true if the article is generic marketing, opinion, or lacks hard facts. Set to false if it is a specific event (product launch, funding, merger).\n2. \"company_name\": The main company involved.\n3. \"category\": Choose one [Funding, Product Launch, Partnership, Legal, Other].\n4. \"sentiment_score\": A float between -1.0 (negative) and 1.0 (positive).\n\nOutput ONLY raw JSON (no markdown, no ```json blocks):\n{\n  \"is_fluff\": boolean,\n  \"company_name\": \"string\",\n  \"category\": \"string\",\n  \"sentiment_score\": number,\n  \"summary\": \"One sentence technical summary\"\n}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        608,
+        -96
+      ],
+      "id": "d405c8b2-c7da-4a2b-9e40-8fe9d518c2b5",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "cxxyJ3oHe4I4ra58",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f0b83ba7-c1e2-421d-894b-44a0ce1ed9e4",
+              "leftValue": "={{ $json.is_fluff }}",
+              "rightValue": "=",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        992,
+        0
+      ],
+      "id": "96cfa504-bb6e-4f77-aa49-d42d1ec4e398",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "18vcwvOgqwYXOxsFRROBegdaQRnSAG3jZMus28_y8QK0",
+          "mode": "list",
+          "cachedResultName": "Storage",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18vcwvOgqwYXOxsFRROBegdaQRnSAG3jZMus28_y8QK0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18vcwvOgqwYXOxsFRROBegdaQRnSAG3jZMus28_y8QK0/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1296,
+        16
+      ],
+      "id": "2c184e88-c387-4748-8379-3270f4177947",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "RlnAyx8zbvIgUaGH",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        384,
+        16
+      ],
+      "id": "9bdbd0d6-1f9f-4985-ad55-1e103c66cfba",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "amount": 4
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1072,
+        240
+      ],
+      "id": "e9e55660-e863-43e5-9778-ac22b35e366a",
+      "name": "Wait",
+      "webhookId": "37a8d55b-82a0-4cb7-a5ee-18428b0bb82d"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the raw text from Gemini safely\nconst item = $input.item.json;\nconst rawText = item.text || \n                item.output || \n                (item.message ? item.message.content : \"\") || \n                (item.content && item.content.parts ? item.content.parts[0].text : \"\") || \n                \"\";\n\n// 2. Clean the formatting (remove ```json and ```)\nconst cleanText = rawText.replace(/```json|```/g, '').trim();\n\n// 3. Parse it into real data\ntry {\n  return JSON.parse(cleanText);\n} catch (error) {\n  return { \"error\": \"JSON Parse Failed\", \"raw_text\": rawText };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        -224
+      ],
+      "id": "0ffe7a73-baaf-45ea-b9ac-747949c407c0",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\nreturn data.articles;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        -256
+      ],
+      "id": "9b530ee6-169e-4de2-917b-d713cc7a9aae",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e6724a81-a885-419d-96ce-f2bcb66480af",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "df383af8f5da1fc2221e79d4fcbef2f00fbeca2060fac2e63e2af3dd6991f7a0"
+  },
+  "id": "XzxntP8DuW5kX1JC",
+  "tags": []
+}
