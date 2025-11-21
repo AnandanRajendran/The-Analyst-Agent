@@ -40,6 +40,31 @@ This is an autonomous AI agent built with **n8n** that monitors news streams for
 
 **Installation Steps**
 
-1. Clone the repository
+**1. Clone the repository**
 
+```
 git clone https://github.com/AnandanRajendran/The-Analyst-Agent
+cd The-Analyst-Agent
+```
+
+**2. Start n8n** You can run n8n using npx (Node.js required)
+```
+npx n8n
+```
+*Once running, open ```http://localhost:5678``` in your browser.*
+
+**3. Import the workflow**
+
+1. In the n8n interface, click **Workflows** (top right menu) > **Import from File**.
+
+2. Select the ```workflow.json``` file included in this repository.
+
+**4. Configure Credentials** For security, API keys are not included in the code. You must enter your own:
+
+* NewsAPI: Open the HTTP Request node. In "Query Parameters", enter your API Key.
+
+* Google Gemini: Open the Google Gemini node. Create a new credential using your Google AI Studio Key.
+
+* Google Sheets: Open the Google Sheets node. Create a credential using "Sign in with Google" (OAuth2) or a Service Account.
+
+**5. Database Setup**
