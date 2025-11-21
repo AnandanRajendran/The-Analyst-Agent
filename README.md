@@ -39,3 +39,7 @@ This is an autonomous AI agent built with **n8n** that monitors news streams for
 * A **NewsAPI** Key.
 
 **Installation Steps**
+
+1. Clone the repository
+
+git clone https://github.com/AnandanRajendran/The-Analyst-Agent
