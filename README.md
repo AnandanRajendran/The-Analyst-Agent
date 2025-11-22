@@ -1,6 +1,8 @@
 # The-Analyst-Agent
 An automated AI News Analyst built with n8n and Google Gemini. Features include article de-duplication, 'hype filtering' via LLMs, and structured data extraction to Google Sheets.
 
+**Youtube link for Demonstration:** [Watch the Demo Video](https://youtu.be/1fqNzRMsLSE)
+
 **Selected Task: Option 2 - The "Analyst" Agent (Advanced Automation)**
 
 I chose this task to demonstrate engineering depth in **process automation, data pipeline architecture, and LLM integration**. It focuses on the practical challenge of filtering noise ("hype") from real signal in data streams, a critical problem in modern AI applications.
